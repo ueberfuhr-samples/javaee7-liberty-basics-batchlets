@@ -6,7 +6,7 @@
 4. [Wie funktioniert Resource Injection?](#wie-funktioniert-resource-injection)
    1. [Wie werden lokale Ressourcen definiert?](#wie-werden-lokale-ressourcen-definiert)
    2. [Was bedeutet der `AuthenticationType` (`<res-auth>`)?](#was-bedeutet-der-authenticationtype-res-auth)
-   3. [Was ist bei der `@Resource`-Annotation der Unterschied zwischen `name`, `lookup` und `mappedName`](#was-ist-bei-der-resource-annotation-der-unterschied-zwischen-name-lookup-und-mappedname)
+   3. [Was ist bei der `@Resource`-Annotation der Unterschied zwischen `name`, `lookup` und `mappedName`?](#was-ist-bei-der-resource-annotation-der-unterschied-zwischen-name-lookup-und-mappedname)
 
 ## Was ist das JNDI und wofür wird es verwendet?
 
