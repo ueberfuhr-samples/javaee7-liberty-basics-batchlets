@@ -5,6 +5,7 @@ charset = utf-8
 indent_size = 2
 indent_style = space
 max_line_length = off
+insert_final_newline = true
 
 [*.md]
 ij_formatter_enabled = false
