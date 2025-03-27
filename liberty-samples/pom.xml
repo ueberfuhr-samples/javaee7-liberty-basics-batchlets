@@ -1,0 +1,198 @@
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>de.samples.jakartaee</groupId>
+  <artifactId>liberty-samples</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+
+  <packaging>pom</packaging>
+  <name>Liberty Sample Projects</name>
+
+  <modules>
+    <module>empty-sample</module>
+  </modules>
+
+  <!-- shared configuration -->
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <maven.compiler.release>21</maven.compiler.release>
+    <!-- Java EE version -->
+    <jakarta.jakartaee-api.version>10.0.0</jakarta.jakartaee-api.version>
+    <jakarta.servlet.jsp.jstl-api.version>3.0.0</jakarta.servlet.jsp.jstl-api.version>
+    <liberty.version>25.0.0.3</liberty.version>
+    <hibernate-core.version>6.6.11.Final</hibernate-core.version>
+    <h2.version>2.3.232</h2.version>
+    <!-- plugin versions -->
+    <maven-war-plugin.version>3.4.0</maven-war-plugin.version>
+    <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
+    <maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
+    <liberty-maven-plugin.version>3.11.3</liberty-maven-plugin.version>
+    <!-- deployment configuration -->
+    <app.name>app</app.name>
+    <liberty.config.file>server.xml</liberty.config.file>
+    <liberty.ports.http>9080</liberty.ports.http>
+    <liberty.ports.https>9443</liberty.ports.https>
+    <liberty.ports.debug>7777</liberty.ports.debug>
+    <liberty.datasource.jndi-name>jdbc/appDB</liberty.datasource.jndi-name>
+    <liberty.admin.username>admin</liberty.admin.username>
+    <liberty.admin.password>password</liberty.admin.password>
+    <shared-resources.artifactIds.h2>h2</shared-resources.artifactIds.h2>
+    <shared-resources.artifactIds.hibernate>hibernate-core,jboss-logging,javassist,byte-buddy,antlr,jandex,classmate,dom4j,hibernate-commons-annotations,jaxb-api,jaxb-runtime</shared-resources.artifactIds.hibernate>
+
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.openliberty.features</groupId>
+        <artifactId>features-bom</artifactId>
+        <version>${liberty.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>jakarta.platform</groupId>
+      <artifactId>jakarta.jakartaee-api</artifactId>
+      <version>${jakarta.jakartaee-api.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.servlet.jsp.jstl</groupId>
+      <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
+      <version>${jakarta.servlet.jsp.jstl-api.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-core</artifactId>
+      <version>${hibernate-core.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>${h2.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <!-- File name referenced from Liberty Configuration -->
+    <finalName>${app.name}</finalName>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-war-plugin</artifactId>
+          <version>${maven-war-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${maven-compiler-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>${maven-dependency-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>io.openliberty.tools</groupId>
+          <artifactId>liberty-maven-plugin</artifactId>
+          <version>${liberty-maven-plugin.version}</version>
+          <extensions>true</extensions>
+          <configuration>
+            <configFile>${liberty.config.file}</configFile>
+            <libertyDebugPort>${liberty.ports.debug}</libertyDebugPort>
+            <assemblyArtifact>
+              <groupId>io.openliberty</groupId>
+              <artifactId>openliberty-runtime</artifactId>
+              <version>${liberty.version}</version>
+              <type>zip</type>
+            </assemblyArtifact>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>include-liberty</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>io.openliberty.tools</groupId>
+            <artifactId>liberty-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>install-liberty</id>
+                <phase>prepare-package</phase>
+                <goals>
+                  <goal>install-server</goal>
+                  <goal>install-feature</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <!-- copy shared server.xml -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-resources-plugin</artifactId>
+            <version>3.3.1</version>
+            <executions>
+              <execution>
+                <id>copy-shared-liberty-config</id>
+                <phase>prepare-package</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <configuration>
+                  <outputDirectory>${project.build.directory}/liberty/wlp/usr/shared/resources/</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>../</directory>
+                      <includes>
+                        <include>server.xml</include>
+                      </includes>
+                      <filtering>true</filtering>
+                    </resource>
+                  </resources>
+                  <delimiters>
+                    <delimiter>#{*}</delimiter>
+                  </delimiters>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <!-- copy h2 & hibernate to shared resources -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>copy-liberty-libraries</id>
+                <phase>prepare-package</phase>
+                <goals>
+                  <goal>copy-dependencies</goal>
+                </goals>
+                <configuration>
+                  <includeArtifactIds>${shared-resources.artifactIds.h2},${shared-resources.artifactIds.hibernate}</includeArtifactIds>
+                  <outputDirectory>${project.build.directory}/liberty/wlp/usr/shared/resources/</outputDirectory>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+</project>
