@@ -347,7 +347,7 @@ Sogenannte "_Mixed-Resource Transactions_" sind möglich, aber mit Einschränkun
 
 ## Was sind Best Practices und Bad Practices?
 
-### "Mark for rollback" so früh wie möglich setzen ud abfragen
+### "Mark for rollback" so früh wie möglich setzen und abfragen
 
 Das vermeidet unnötige Ausführung von Logik. Riskante Zugriffe sollten zuerst stattfinden. Der Status sollte zwischendrin abgefragt werden.
 
