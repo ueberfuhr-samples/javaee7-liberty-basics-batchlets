@@ -1,0 +1,56 @@
+<server>
+  <featureManager>
+    <feature>localConnector-1.0</feature>
+    <feature>jakartaee-10.0</feature>
+    <feature>bells-1.0</feature>
+  </featureManager>
+
+  <library id="h2driver">
+    <fileset
+      dir="${shared.resource.dir}"
+      includes="h2*.jar"
+    />
+  </library>
+  <dataSource jndiName="#{liberty.datasource.jndi-name}">
+    <jdbcDriver
+      javax.sql.DataSource="org.h2.jdbcx.JdbcDataSource"
+      libraryRef="h2driver"
+    />
+    <properties URL="jdbc:h2:./.local-db/#{app.name}"/>
+    <properties user="sa"/>
+  </dataSource>
+
+  <!-- Use Hibernate instead of EclipseLink -->
+  <library id="hibernate">
+    <fileset
+      dir="${shared.resource.dir}"
+      includes="*.jar"
+    />
+  </library>
+  <bell libraryRef="hibernate"/>
+  <jpa defaultPersistenceProvider="org.hibernate.jpa.HibernatePersistenceProvider"/>
+
+  <basicRegistry
+    id="basic"
+    realm="BasicRealm"
+  >
+    <user
+      name="#{liberty.admin.username}"
+      password="#{liberty.admin.password}"
+    />
+  </basicRegistry>
+
+  <httpEndpoint
+    id="defaultHttpEndpoint"
+    host="*"
+    httpPort="#{liberty.ports.http}"
+    httpsPort="#{liberty.ports.https}"
+  />
+
+  <webApplication
+    id="app"
+    contextRoot="/#{app.name}"
+    location="#{app.name}.war">
+    <classloader commonLibraryRef="hibernate"/>
+  </webApplication>
+</server>
