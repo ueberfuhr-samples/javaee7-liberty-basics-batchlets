@@ -41,7 +41,7 @@
     <liberty.admin.username>admin</liberty.admin.username>
     <liberty.admin.password>password</liberty.admin.password>
     <shared-resources.artifactIds.h2>h2</shared-resources.artifactIds.h2>
-    <shared-resources.artifactIds.hibernate>hibernate-core,jboss-logging,javassist,byte-buddy,antlr,jandex,classmate,dom4j,hibernate-commons-annotations,jaxb-api,jaxb-runtime</shared-resources.artifactIds.hibernate>
+    <shared-resources.artifactIds.hibernate>hibernate-core,jboss-logging,byte-buddy,jandex,classmate,hibernate-commons-annotations,jaxb-runtime</shared-resources.artifactIds.hibernate>
 
   </properties>
 
