@@ -8,7 +8,7 @@ In this folder, we can find sample projects with Jakarta EE and Liberty.
 ## How to use
 
 > [!NOTE]
-> These commands have to be executed with the sub projects.
+> These commands have to be executed within the sub projects.
 
 To download and install Liberty, invoke Maven:
 
