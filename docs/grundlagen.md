@@ -32,45 +32,9 @@ Oft werden diese mit Servlet-Klassen kombiniert, sodass die Logik in Java-Code, 
 
 ## CDI (Contexts and Dependency Injection)
 
-### Was ist Dependency Injection?
+CDI ist ein Standard für Dependency Injection in Jakarta EE. Neben üblichen Konzepten von [Bean Management & Dependency Injection](bean-management-dependency-injection.md) hat CDI vor allem die Web Scope Awareness.
 
-Kaffee bringen lassen, statt selber Kaffee holen 😉
-
-### Welche Herausforderungen gibt es bei DI?
-
-- Abhängigkeit von DI Container - funktioniert nur, wenn beide Objekte (die Abhängigkeit und das abhängige Objekt) im Container verwaltet werden
-- Inversion of Control ("Kontrolle abgeben")
-- Verlust an Übersicht durch loose Kopplung
-- Debugging schwieriger
-
-### Welche Vorteile hat DI?
-
-- Separation of Concerns - Trennung der Verantwortlichkeiten
-- weniger Boilerplate Code
-- loose Kopplung ermöglicht Austauschbarkeit
-  - der Umgebung
-  - der Abhängigkeit (Mocking! Testbarkeit!)
-
-### Welche Arten von Injection gibt es?
-
-Wir können zweierlei Unterscheiden (beliebig kreuzbar)
-
-#### Nach der Syntax
-
-- **Constructor Injection**: über Konstruktorparameter (empfohlen)
-- **Field Injection**: Direktzuweisung an Instanzvariable per `@Inject`
-- **Method/Setter Injection**: Übergabe als Methodenparameter
-
-> [!NOTE]
-> Beim Mischen der Varianten in einer Klasse findet Dependency Injection in dieser Reihenfolge statt.
-
-#### Nach Zuordnung der Abhängigkeit
-
-- **Injection by Type** (Standard): Finden der Instanz(en) des Datentypes im Context (1:1 oder 1:n)
-- **Injection by Name**: Finden der Instanz nach deren Name (eindeutig)
-- **Injection by Qualifier**: Finden der Instanz nach zusätzlicher Annotation
-
-### Welche CDI-Features gibt es noch?
+### Welche speziellen CDI-Features sollten bekannt sein?
 
 - **Producer Methods und Producer Fields**: Factory Pattern für Dependency Injection
 - **CDI Events**: Loose Kopplung, Observer Pattern (1:n), synchron und asynchron (innerhalb des CDI Containers)
