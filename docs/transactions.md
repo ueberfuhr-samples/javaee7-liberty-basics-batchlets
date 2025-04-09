@@ -107,10 +107,10 @@ public void customXaLogic() throws Exception {
 
 #### Deklarative Transaktionssteuerung (Container-gesteuert)
 
-In Enterprise Java Beans (EJBs) oder modernen Jakarta CDI-Beans (in manchen Frameworks) kannst du Transaktionen deklarativ mit Annotations steuern:
+In CDI-Beans bzw. Enterprise Java Beans (EJBs) kannst du Transaktionen deklarativ mit Annotationen steuern:
 
 ```java
-@Stateless
+@ApplicationScoped
 public class MyService {
 
   @Transactional(Transactional.TxType.REQUIRED)
@@ -120,16 +120,20 @@ public class MyService {
 }
 ```
 
-Oder speziell für EJBs:
+Oder für EJBs:
 
 ```java
-@TransactionAttribute(TransactionAttributeType.REQUIRED)
-public void process() {
-  // Automatisch transaktional
+@Stateless
+public class MyEJB {
+
+  @TransactionAttribute(TransactionAttributeType.REQUIRED)
+  public void process() {
+    // Container übernimmt begin / commit / rollback
+  }
 }
 ```
 
-Diese Annotation ist Teil des EJB-Standards und daher besser in das Lebenszyklusmodell von EJBs integriert (z.B. für `@PostConstruct`-Methoden)
+Die Annotation `@TransactionAttribute` ist Teil des EJB-Standards und daher besser in das Lebenszyklusmodell von EJBs integriert (z.B. für `@PostConstruct`-Methoden)
 
 > [!TIP]
 > Der `TxType` bzw. `TransactionAttributeType` (_Propagation Strategy_) kann angegeben werden, um den Container anzuweisen,
@@ -139,13 +143,13 @@ Diese Annotation ist Teil des EJB-Standards und daher besser in das Lebenszyklus
 > [!IMPORTANT]
 > Bei CMT verwaltet der Container den Lebenszyklus der Transaktion. Das ist einfacher, weil weniger Code zu schreiben ist. Hier gibt es jedoch Grenzen und Fallstricke zu beachten:
 > - Es kann nicht auf Fehler beim Commit reagiert werden.
-> - Bewegt man sich innerhalb einer bereits existierenden Transaktion und greift in der eigenen Methode dann auf transaktionsfähige Ressourcen zu, dann werden auch diese im offenen (nicht committeten) Zustand gehalten, solange die Transaktion offen ist. Das sorgt v.a. bei Host-Zugriffen (Connectoren) für nicht unerheblichen Ressourcenverbrauch. In solchen Fällen empfiehlt sich die Verwendung von `REQUIRES_NEW`.
+> - Bewegt man sich innerhalb einer bereits existierenden Transaktion und greift in der eigenen Methode dann auf transaktionsfähige Ressourcen zu, dann werden auch diese im offenen (nicht committeten) Zustand gehalten, solange die Transaktion offen ist. Das sorgt v.a. bei Host-Zugriffen (Connectoren) für nicht unerheblichen Ressourcenverbrauch. In solchen Fällen empfiehlt sich die Verwendung von `REQUIRES_NEW` oder `NOT_SUPPORTED`.
 
 ## Was passiert bei Exceptions?
 
 Diese Fragestellung ist vor allem bei CMT wichtig. Hier ist für beide Annotationen (`@Transactional` und `@TransactionAttribute`) folgendes Verhalten festgelegt:
 
-- Bei _Unchecked Exceptions_ (`RuntimeException` und `Error`) erfolgt ein automatischer Rollback.
+- Bei _Unchecked Exceptions_ (`RuntimeException` und `Error`) erfolgt ein automatisches Rollback.
 - Bei _Checked Exceptions_ erfolgt kein Rollback.
 
 Es ist bei `@Transactional` jedoch möglich, eine Exception anzugeben, bei der ein Rollback ausgelöst werden soll. Durch die Berücksichtigung von Vererbungshierarchien lässt sich so auch generell ein Rollback bei _Checked Exceptions_ erzwingen. Und es lassen sich Ausnahmen angeben:
@@ -306,7 +310,7 @@ public void example() throws Exception {
 
 ## Was sind Verteilte Transaktionen (XA)?
 
-Eine verteilte Transaktion (engl. "distributed transaction") ist eine Transaktion, die über mehrere unterschiedliche Ressourcen oder Systeme hinweg läuft und sicherstellt, dass alle beteiligten Systeme entweder gemeinsam committen oder rollbacken – ganz nach dem ACID-Prinzip. Die Abkürzung _XA_ steht dabei für _eXtended Architecture_.
+Eine verteilte Transaktion (engl. "distributed transaction") ist eine Transaktion, die über mehrere unterschiedliche Ressourcen oder Systeme läuft und sicherstellt, dass alle beteiligten Systeme entweder gemeinsam committen oder rollbacken – ganz nach dem ACID-Prinzip. Die Abkürzung _XA_ steht dabei für _eXtended Architecture_.
 
 > [!TIP]
 > **Beispiel:**
@@ -349,7 +353,7 @@ Sogenannte "_Mixed-Resource Transactions_" sind möglich, aber mit Einschränkun
 
 ### "Mark for rollback" so früh wie möglich setzen und abfragen
 
-Das vermeidet unnötige Ausführung von Logik. Riskante Zugriffe sollten zuerst stattfinden. Der Status sollte zwischendrin abgefragt werden.
+Das vermeidet unnötige Ausführung von Logik. Riskante Zugriffe sollten zuerst stattfinden. Der Status sollte zwischendrin und vor Aufruf von `commit()` abgefragt werden.
 
 ### Schichtenarchitekturen
 
@@ -357,7 +361,7 @@ Halte Transaktionsgrenzen möglichst in Service-Schichten, nicht in der Domänen
 
 ### Spezifische Exceptions nutzen
 
-Vermeide es, alles mit `RuntimeException` oder `Exception` zu fangen. Definiere klare Business-Exceptions und ggf. Technical-Exceptions, die explizit einen Rollback auslösen sollen.
+Vermeide es, alles mit `RuntimeException` oder `Exception` zu fangen. Definiere klare Business-Exceptions und ggf. Technical-Exceptions, die explizit ein Rollback auslösen sollen.
 
 ```java
 @ApplicationException(rollback = true)
@@ -369,7 +373,7 @@ So kannst du präzise steuern, wann der Container "marked for rollback" setzt.
 ### `REQUIRES_NEW` sparsam einsetzen
 
 Nutze `REQUIRES_NEW` nur für echte Isolationsfälle, z. B. Audit, Logging, technische Protokollierung. In Business-Logik lieber propagieren und sauber rollen oder committen.
-Unnötige `REQUIRES_NEW` erzeugen unnötig viele eigenständige Transaktionen und können zu "Lost Updates" führen.
+Unnötige `REQUIRES_NEW` erzeugen unnötig viele eigenständige Transaktionen und können zu "Lost Updates" (Verlust von Änderungen bei konkurrierenden Transaktionen auf demselben Datensatz) führen.
 
 ### Transaktionsstatus abfragen, statt Exception-driven Design
 
