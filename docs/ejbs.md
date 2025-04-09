@@ -255,12 +255,16 @@ public class EjbRemoteClient {
     // Beispiel für WildFly
     jndiProps.put(
       Context.INITIAL_CONTEXT_FACTORY, 
-      "org.wildfly.naming.client.WildFlyInitialContextFactory");
+      "org.wildfly.naming.client.WildFlyInitialContextFactory"
+    );
     jndiProps.put(
       Context.PROVIDER_URL, 
       "http-remoting://localhost:8080"
-      );
-    jndiProps.put(Context.URL_PKG_PREFIXES, "org.jboss.ejb.client.naming");
+    );
+    jndiProps.put(
+      Context.URL_PKG_PREFIXES,
+      "org.jboss.ejb.client.naming"
+    );
 
     try (Context ctx = new InitialContext(jndiProps)) {
       // JNDI-Name hängt vom Server und der App-Struktur ab
